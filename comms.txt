@@ -1,0 +1,19 @@
+##create 
+
+ curl -X POST "http://127.0.0.1:8000/nef/subscriptions" \
+  -H "Content-Type: application/json" \
+  -d '{"ue_id":"001","event_type":"ue-status-change","callback_url":"https://example.com/callback"}'
+
+
+## inspect 
+
+curl "http://127.0.0.1:8000/nef/subscriptions"
+
+
+## delete
+
+curl -X DELETE "http://127.0.0.1:8000/nef/subscriptions/sub-001"
+
+## list of subs
+
+curl -s "http://127.0.0.1:8000/nef/subscriptions" | python -m json.tool
