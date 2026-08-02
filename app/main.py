@@ -27,6 +27,30 @@ fake_ue_data = {
     },
 }
 
+fake_slice_load_data = {
+    "slice-embb": {
+        "slice_id": "slice-embb",
+        "name": "Enhanced Mobile Broadband",
+        "load_percent": 72,
+        "active_ues": 128,
+        "status": "high",
+    },
+    "slice-urllc": {
+        "slice_id": "slice-urllc",
+        "name": "Ultra-Reliable Low-Latency Communications",
+        "load_percent": 34,
+        "active_ues": 42,
+        "status": "normal",
+    },
+    "slice-mmtc": {
+        "slice_id": "slice-mmtc",
+        "name": "Massive Machine-Type Communications",
+        "load_percent": 18,
+        "active_ues": 360,
+        "status": "normal",
+    },
+}
+
 
 @app.get("/health")
 def health_check():
@@ -38,10 +62,27 @@ def list_ues():
         "count": len(fake_ue_data),
         "ues": list(fake_ue_data.values()),
     }
-    
+
+@app.get("/nwdaf/analytics/slice-load")
+def get_slice_load_analytics():
+    return {
+        "analytics_type": "slice-load",
+        "slices": list(fake_slice_load_data.values()),
+    }
+
 @app.get("/nef/ue/{ue_id}/status")
 def get_ue_status(ue_id: str):
     if ue_id not in fake_ue_data:
         raise HTTPException(status_code=404, detail="UE not found")
 
     return fake_ue_data[ue_id]
+
+@app.get("/nwdaf/analytics/slice-load/{slice_id}")
+def get_slice_load_analytics_by_slice(slice_id: str):
+    if slice_id not in fake_slice_load_data:
+        raise HTTPException(status_code=404, detail="Slice not found")
+
+    return {
+        "analytics_type": "slice-load",
+        "slice": fake_slice_load_data[slice_id],
+    }
