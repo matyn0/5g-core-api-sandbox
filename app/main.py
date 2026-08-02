@@ -32,7 +32,13 @@ fake_ue_data = {
 def health_check():
     return {"status": "ok"}
 
-
+@app.get("/nef/ue")
+def list_ues():
+    return {
+        "count": len(fake_ue_data),
+        "ues": list(fake_ue_data.values()),
+    }
+    
 @app.get("/nef/ue/{ue_id}/status")
 def get_ue_status(ue_id: str):
     if ue_id not in fake_ue_data:
