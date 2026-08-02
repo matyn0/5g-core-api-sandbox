@@ -131,3 +131,23 @@ def list_subscriptions():
         "count": len(fake_subscriptions),
         "subscriptions": list(fake_subscriptions.values()),
     }
+
+@app.get("/nef/subscriptions/{subscription_id}")
+def get_subscription(subscription_id: str):
+    if subscription_id not in fake_subscriptions:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    return fake_subscriptions[subscription_id]
+
+
+@app.delete("/nef/subscriptions/{subscription_id}")
+def delete_subscription(subscription_id: str):
+    if subscription_id not in fake_subscriptions:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    deleted_subscription = fake_subscriptions.pop(subscription_id)
+
+    return {
+        "message": "Subscription deleted",
+        "subscription": deleted_subscription,
+    }
