@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI(
     title="5G Core API Sandbox",
@@ -51,6 +52,20 @@ fake_slice_load_data = {
     },
 }
 
+fake_subscriptions = {}
+
+
+class SubscriptionRequest(BaseModel):
+    ue_id: str
+    event_type: str
+    callback_url: str
+
+
+
+
+
+
+##### GET SECTION #######
 
 @app.get("/health")
 def health_check():
@@ -85,4 +100,34 @@ def get_slice_load_analytics_by_slice(slice_id: str):
     return {
         "analytics_type": "slice-load",
         "slice": fake_slice_load_data[slice_id],
+    }
+
+
+
+
+##### POST SECTION ######
+
+@app.post("/nef/subscriptions")
+def create_subscription(subscription: SubscriptionRequest):
+    if subscription.ue_id not in fake_ue_data:
+        raise HTTPException(status_code=404, detail="UE not found")
+
+    subscription_id = f"sub-{len(fake_subscriptions) + 1:03}"
+
+    fake_subscriptions[subscription_id] = {
+        "subscription_id": subscription_id,
+        "ue_id": subscription.ue_id,
+        "event_type": subscription.event_type,
+        "callback_url": subscription.callback_url,
+        "status": "active",
+    }
+
+    return fake_subscriptions[subscription_id]
+
+
+@app.get("/nef/subscriptions")
+def list_subscriptions():
+    return {
+        "count": len(fake_subscriptions),
+        "subscriptions": list(fake_subscriptions.values()),
     }
