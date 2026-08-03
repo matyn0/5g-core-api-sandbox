@@ -1,0 +1,103 @@
+Goal
+Set up the project on macOS from GitHub and run the FastAPI app locally.
+Before Leaving Current Device
+Make sure everything is pushed to GitHub:
+git status
+git add -A
+git commit -m "Refactor app into routers models and data"
+git push
+Then check GitHub in browser and confirm you see:
+app/main.py
+app/data.py
+app/models.py
+app/routers/nef.py
+app/routers/nwdaf.py
+requirements.txt
+README.md
+.gitignore
+Mac Setup
+Install Homebrew if you do not have it:
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+Install needed tools:
+brew install git python
+Check versions:
+git --version
+python3 --version
+pip3 --version
+Clone Project
+Create projects folder:
+mkdir -p ~/projects
+cd ~/projects
+Clone your repo:
+git clone https://github.com/YOUR_USERNAME/5g-core-api-sandbox.git
+cd 5g-core-api-sandbox
+Replace YOUR_USERNAME with your GitHub username.
+Check repo:
+git status
+Expected:
+On branch main
+Your branch is up to date with 'origin/main'.
+nothing to commit, working tree clean
+Create Virtual Environment
+Inside the project folder:
+python3 -m venv .venv
+source .venv/bin/activate
+Your terminal should show:
+(.venv)
+Upgrade pip:
+python -m pip install --upgrade pip
+Install project dependencies:
+pip install -r requirements.txt
+Run App
+Start FastAPI:
+python -m uvicorn app.main:app --reload
+Open in browser:
+http://127.0.0.1:8000/docs
+Test health endpoint:
+http://127.0.0.1:8000/health
+Expected:
+{"status":"ok"}
+Test With Curl
+Open second terminal:
+cd ~/projects/5g-core-api-sandbox
+source .venv/bin/activate
+Create subscription:
+curl -X POST "http://127.0.0.1:8000/nef/subscriptions" \
+  -H "Content-Type: application/json" \
+  -d '{"ue_id":"001","event_type":"ue-status-change","callback_url":"https://example.com/callback"}'
+List subscriptions:
+curl -s "http://127.0.0.1:8000/nef/subscriptions" | python -m json.tool
+Delete subscription:
+curl -X DELETE "http://127.0.0.1:8000/nef/subscriptions/sub-001"
+Important Notes
+.venv is not downloaded from GitHub. You recreate it on every device.
+Your code comes from GitHub. Your dependencies come from:
+requirements.txt
+If you restart the API, subscriptions disappear because they are stored only in memory for now.
+Current Project Context
+Project name:
+5g-core-api-sandbox
+Purpose:
+Local-first FastAPI sandbox for simulating 5G NEF and NWDAF APIs.
+Current structure:
+app/
+  main.py
+  data.py
+  models.py
+  routers/
+    __init__.py
+    nef.py
+    nwdaf.py
+Current endpoints:
+GET    /health
+GET    /nef/ue
+GET    /nef/ue/{ue_id}/status
+POST   /nef/subscriptions
+GET    /nef/subscriptions
+GET    /nef/subscriptions/{subscription_id}
+DELETE /nef/subscriptions/{subscription_id}
+GET    /nwdaf/analytics/slice-load
+GET    /nwdaf/analytics/slice-load/{slice_id}
+When you get to Mac, the first thing to send me is the output of:
+git status
+python3 --version
