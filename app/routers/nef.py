@@ -27,7 +27,14 @@ def create_subscription(subscription: SubscriptionRequest):
     if subscription.ue_id not in fake_ue_data:
         raise HTTPException(status_code=404, detail="UE not found")
 
-    subscription_id = f"sub-{len(fake_subscriptions) + 1:03}"
+    next_subscription_number = max(
+        (
+            int(subscription_id.removeprefix("sub-"))
+            for subscription_id in fake_subscriptions
+        ),
+        default=0,
+    ) + 1
+    subscription_id = f"sub-{next_subscription_number:03}"
 
     fake_subscriptions[subscription_id] = {
         "subscription_id": subscription_id,
