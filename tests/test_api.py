@@ -1,18 +1,63 @@
+from collections.abc import Generator
+
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
-from app.data import fake_subscriptions
+from app.database import Base, get_db
 from app.main import app
 
 
+# Use a temporary SQLite database that exists only in memory.
+# This database is completely separate from the real 5g_core.db file.
+TEST_DATABASE_URL = "sqlite://"
+
+
+# StaticPool makes every test connection share the same in-memory database.
+# Without it, each connection could receive a separate empty database.
+test_engine = create_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+
+
+# Create database sessions specifically for automated tests.
+TestSessionLocal = sessionmaker(
+    bind=test_engine,
+    autoflush=False,
+    expire_on_commit=False,
+)
+
+
+# Replace the real get_db dependency with the test database dependency.
+# API requests made by TestClient will use this temporary database.
+def override_get_db() -> Generator[Session, None, None]:
+    with TestSessionLocal() as session:
+        yield session
+
+
+# Tell FastAPI to use the test database instead of 5g_core.db.
+app.dependency_overrides[get_db] = override_get_db
+
+
+# TestClient sends simulated HTTP requests directly into FastAPI.
 client = TestClient(app)
 
 
+# Recreate all database tables before every test.
+# This keeps tests independent and resets generated IDs to sub-001.
 @pytest.fixture(autouse=True)
-def reset_subscriptions():
-    fake_subscriptions.clear()
+def reset_database():
+    Base.metadata.drop_all(bind=test_engine)
+    Base.metadata.create_all(bind=test_engine)
+
     yield
-    fake_subscriptions.clear()
+
+    # Remove all test tables and data after the test finishes.
+    Base.metadata.drop_all(bind=test_engine)
 
 
 def test_health_check():

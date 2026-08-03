@@ -17,3 +17,20 @@ curl -X DELETE "http://127.0.0.1:8000/nef/subscriptions/sub-001"
 ## list of subs
 
 curl -s "http://127.0.0.1:8000/nef/subscriptions" | python -m json.tool
+
+
+## all 
+
+app/.venv/bin/python -m pytest
+
+
+
+
+
+
+## SQL 
+
+sqlite3 -readonly 5g_core.db ".tables"
+
+sqlite3 -readonly -header -column 5g_core.db \
+  "SELECT * FROM subscriptions ORDER BY id;

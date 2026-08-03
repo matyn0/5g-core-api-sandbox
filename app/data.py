@@ -42,5 +42,3 @@ fake_slice_load_data = {
         "status": "normal",
     },
 }
-
-fake_subscriptions = {}

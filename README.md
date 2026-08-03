@@ -53,6 +53,20 @@ The tests run the FastAPI application in-process, so Uvicorn does not need to be
 python -m pytest -v
 ```
 
+Tests use a separate in-memory SQLite database and do not modify local development data.
+
+## Persistence
+
+Subscriptions are stored in the local SQLite database `5g_core.db` and remain available after the API restarts. SQLAlchemy creates the required database table automatically when FastAPI starts.
+
+The database connection can be changed with the `DATABASE_URL` environment variable. The default value is:
+
+```text
+sqlite:///./5g_core.db
+```
+
+The local database file is excluded from Git.
+
 ## Endpoints
 
 | Method | Path |
@@ -69,4 +83,4 @@ python -m pytest -v
 
 ## Current Limitations
 
-Subscriptions are stored in memory and disappear when the API process restarts.
+UE and slice analytics data are static simulator fixtures. Database schema migrations are not implemented yet; missing tables are created automatically at startup.
